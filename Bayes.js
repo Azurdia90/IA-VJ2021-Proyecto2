@@ -232,8 +232,7 @@ Nodo_Arbol.prototype = {
 
 /********** ARBOL DE DECISIONES **********/
 const HashMap = require('./HashMap');
-const $data = require('./data');
-//const InfoGain = require('./InfoGain');
+const InfoGanancia = require('./InfoGain');
 
 function Iterator(arr){
     if(!(arr instanceof Array)){
