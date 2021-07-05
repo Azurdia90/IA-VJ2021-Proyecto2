@@ -1,6 +1,6 @@
 //grupo 9 
+//EVA
 var $data = require('./data');
-//const HashMap = require('./HashMap');
 
 function Iterator(arr){
   if(!(arr instanceof Array)){
@@ -18,12 +18,9 @@ Iterator.prototype.current = function() {
 
 Iterator.prototype.next = function(){
   this.index += 1;
-  if(this.index > this.length || this.arr[this.index-1] === null){
+  if(this.index > this.length || this.arr[this.index-1] === null)
     return false;
-  }
-  else{
-    return true;
-  }
+  return true;
 }
 
 function Evaluate(dato) {
@@ -91,28 +88,28 @@ Evaluate.prototype.result = function() {
 }
 
 Evaluate.prototype.getMatrix = function(model, testData) {
-  var _data = testData.slice(0);
+  var data = testData.slice(0);
   if(typeof model !== 'object'){
     throw new Error('se necesita un modelo');
   };
-  var _matrix = [[0,0],[0,0]];
-  var iter = new Iterator(_data);
+  var eva_matrix = [[0,0],[0,0]];
+  var iter = new Iterator(data);
   while(iter.next()){
     var test = iter.current();
     var true_res = test.splice(test.length-1, 1)[0];
     var pred_res = model.predictClass(test);
     if(pred_res === 'YES' && true_res === 'YES'){
-        _matrix[0][0]++;
+      eva_matrix[0][0]++;
     }else if(pred_res === 'YES' && true_res === 'NO'){
-        _matrix[1][0]++;
+      eva_matrix[1][0]++;
     }else if(pred_res === 'NO' && true_res === 'YES'){
-        _matrix[0][1]++;
+      eva_matrix[0][1]++;
     }else if(pred_res === 'NO' && true_res === 'NO'){
-        _matrix[1][1]++;
+      eva_matrix[1][1]++;
     };
     test.push(true_res);
   }
-  return _matrix;
+  return eva_matrix;
 }
 
 Evaluate.prototype.calcRate = function(matrix){
@@ -121,15 +118,18 @@ Evaluate.prototype.calcRate = function(matrix){
   return [fpr.toFixed(2), tpr.toFixed(2)];
 }
 
-/* BAYES */
+
+//BAYES
+//const HashMap = require('./HashMap');
+
 function Bayes($data){
   this._DATA = $data;
 }
 
-/**
+    /**
    * Clasifica los datos de entrenamiento en categorías
    * @return HashMap <categoría, datos de entrenamiento de la categoría correspondiente>
-*/
+   */
 
 Bayes.prototype.dataOfClass = function(){
     var map = new HashMap();
@@ -157,41 +157,89 @@ Bayes.prototype.dataOfClass = function(){
     return map;
 }
 
+/*
+  dataOfClass: function() {
+    var map = new HashMap();
+    var t = [], c = '';
+    var datas = this._DATA;
+
+    if(!(datas instanceof Array)){
+        return;
+    }
+
+    for(var i = 0; i < datas.length; i++){
+      t = datas[i];
+      c = t[t.length - 1];
+      if(map.hasKey(c)){
+        var ot = map.get(c);
+        ot.push(t);
+        map.put(c, ot);
+      }
+      else {
+        var nt = [];
+        nt.push(t);
+        map.put(c, nt);
+      }
+    }
+    return map;
+  },
+  */
+
 /**
     * Predecir la categoría de datos de prueba
     * @param Array testT datos de prueba
     * @return String Categoría correspondiente de datos de prueba
 */
 
-Bayes.prototype.predictClass = function(testT){
-    var doc = dataOfClass();
-    var maxP = 0, maxPIndex = -1;
-    var classes = doc.keys();
-    
-    for(var i = 0; i < classes.length; i++){
-        var c = classes[i];
-        var d = doc.get(c);
-        var pOfC = d.length / this._DATA.length;
-        
-        for(var j = 0; j < testT.length; j++){
+function predictClass(testT){
+        var doc = dataOfClass();
+        var maxP = 0, maxPIndex = -1;
+        var classes = doc.keys();
+        for(var i = 0; i < classes.length; i++){
+          var c = classes[i]
+          var d = doc.get(c);
+          var pOfC = d.length / this._DATA.length;
+          for(var j = 0; j < testT.length; j++){
             var pv = this.pOfV(d, testT[j], j);
             pOfC = pOfC * pv;
-        }
-
-        if(pOfC > maxP){
+          }
+          if(pOfC > maxP){
             maxP = pOfC;
             maxPIndex = i;
+          }
         }
-    }
-
-    if(maxPIndex === -1 || maxPIndex > doc.length){
-        return 'No se puede clasificar';
-    }
-
-    return classes[maxPIndex];
+        if(maxPIndex === -1 || maxPIndex > doc.length){
+          return 'No se puede clasificar';
+        }
+        return classes[maxPIndex];
 }
 
-Bayes.prototype.pOfV = function(d, value, index){
+  /*
+  predictClass: function(testT){
+    var doc = this.dataOfClass();
+    var maxP = 0, maxPIndex = -1;
+    var classes = doc.keys();
+    for(var i = 0; i < classes.length; i++){
+      var c = classes[i]
+      var d = doc.get(c);
+      var pOfC = d.length / this._DATA.length;
+      for(var j = 0; j < testT.length; j++){
+        var pv = this.pOfV(d, testT[j], j);
+        pOfC = pOfC * pv;
+      }
+      if(pOfC > maxP){
+        maxP = pOfC;
+        maxPIndex = i;
+      }
+    }
+    if(maxPIndex === -1 || maxPIndex > doc.length){
+      return 'No se puede clasificar';
+    }
+    return classes[maxPIndex];
+  },
+  */
+
+function pOfV(d, value, index){
     var p = 0, count = 0, total = d.length, t = [];
     for(var i = 0; i < total; i++){
       if(d[i][index] === value)
@@ -200,3 +248,17 @@ Bayes.prototype.pOfV = function(d, value, index){
     p = count / total;
     return p;
 } 
+
+/*
+  pOfV: function(d, value, index){
+    var p = 0, count = 0, total = d.length, t = [];
+    for(var i = 0; i < total; i++){
+      if(d[i][index] === value)
+        count++;
+    }
+    p = count / total;
+    return p;
+  } 
+  */
+//}
+//module.exports = Bayes;
